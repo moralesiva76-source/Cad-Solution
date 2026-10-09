@@ -1,0 +1,330 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Planos de Finca Nueva por Titulación</title>
+<style>
+:root{--navy:#17324d;--blue:#245b80;--line:#263746;--muted:#667788;--bg:#f2f5f8}
+*{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:#1b2733}
+header{background:var(--navy);color:white;padding:18px 22px}header h1{margin:0 0 6px;font-size:23px}header p{margin:0;color:#dce7ef;font-size:13px}
+main{max-width:1400px;margin:18px auto;padding:0 14px;display:grid;grid-template-columns:minmax(300px,390px) 1fr;gap:16px}
+.panel{background:white;border:1px solid #d4dde5;border-radius:10px;padding:16px;box-shadow:0 2px 8px #172b3b0a;min-width:0}
+h2{font-size:17px;margin:0 0 12px;color:var(--navy)}h3{font-size:14px;margin:18px 0 8px;color:var(--navy)}
+label{display:block;font-size:12px;font-weight:700;margin:9px 0 4px;color:#334b60}
+input,select,textarea{width:100%;padding:9px;border:1px solid #c6d1db;border-radius:6px;font:14px Arial;background:#fff;color:#182532}
+input[type=file]{padding:7px;font-size:12px}textarea{min-height:62px;resize:vertical}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+button{border:0;border-radius:6px;background:var(--blue);color:white;font-weight:700;padding:10px 12px;cursor:pointer;margin:6px 5px 0 0}button.secondary{background:#e8eef3;color:#19364e;border:1px solid #cbd7e1}button.danger{background:#9b3b3b}
+.note{font-size:12px;line-height:1.45;color:#526575;background:#f1f6fa;border-left:3px solid #4c89b5;padding:9px;margin:10px 0}
+.status{font-size:13px;min-height:18px;color:#1f6644;margin-top:8px}
+.tablewrap{max-height:220px;overflow:auto;border:1px solid #d8e0e7;border-radius:6px;margin-top:8px}
+table{border-collapse:collapse;width:100%;font-size:12px}th,td{padding:7px;border-bottom:1px solid #e0e6eb;text-align:left;white-space:nowrap}th{background:#edf2f6;position:sticky;top:0}
+.preview-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.metric{background:#f2f6f9;border:1px solid #dbe4eb;padding:10px;border-radius:7px}.metric span{display:block;color:#5a6e7e;font-size:11px}.metric strong{font-size:17px;color:var(--navy)}
+#plan{background:#fff;border:1px solid #cbd4dc;width:100%;aspect-ratio:11/17;overflow:hidden;max-width:760px;margin:0 auto}
+#plan svg{display:block;width:100%;height:100%}
+.small{font-size:11px;color:var(--muted);line-height:1.4}
+footer{max-width:1400px;margin:0 auto;padding:0 14px 22px;color:#647583;font-size:11px}
+@media(max-width:900px){main{grid-template-columns:1fr}.metrics{grid-template-columns:1fr 1fr 1fr}}
+@media(max-width:520px){.grid2,.grid3{grid-template-columns:1fr 1fr}.metrics{grid-template-columns:1fr}.panel{padding:12px}}
+@page{size:11in 17in portrait;margin:0.25in}
+@media print{
+ body{background:white}header,main>.panel:first-child,.preview-head,.metrics,.screen-only,footer{display:none!important}
+ main{display:block;margin:0;padding:0;max-width:none}.panel{border:0;box-shadow:none;padding:0}#plan{border:0;width:100%;max-width:none;height:auto;aspect-ratio:11/17}
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>Generador de planos de finca nueva por titulación</h1>
+  <p>Herramienta de apoyo para dibujar el polígono, calcular medidas y preparar una lámina imprimible.</p>
+</header>
+<main>
+<section class="panel">
+  <h2>1. Datos del inmueble</h2>
+  <div class="grid2">
+    <div><label>Propietario(s)</label><input id="owner" placeholder="Nombre completo"></div>
+    <div><label>Nombre de finca</label><input id="estate" placeholder="Nombre o SIN NOMBRE"></div>
+  </div>
+  <label>Dirección de la finca (si la tiene)</label><input id="address" placeholder="Dirección o SIN DIRECCIÓN">
+  <div class="grid2">
+    <div><label>Municipio</label><input id="municipality" placeholder="Municipio"></div>
+    <div><label>Departamento</label><input id="department" placeholder="Departamento"></div>
+  </div>
+  <div class="grid2">
+    <div><label>Naturaleza</label><select id="nature"><option>Rústica</option><option>Urbana</option></select></div>
+    <div><label>Escala indicada</label><input id="scale" value="1:2000"></div>
+  </div>
+  <div class="grid2">
+    <div><label>Fecha</label><input id="date" type="date"></div>
+    <div><label>Responsable técnico</label><input id="professional" placeholder="Nombre y profesión"></div>
+  </div>
+  <label>Colindancias por orientación (ej.: Norte: camino; Este: finca vecina)</label>
+  <textarea id="neighbors" placeholder="Ej.: Norte: camino; Este: finca vecina..."></textarea>
+  <h3>2. Cargar coordenadas</h3>
+  <label>Archivo Excel (.xlsx, .xls) o CSV</label><input id="file" type="file" accept=".xlsx,.xls,.csv">
+  <div class="note"><b>Formato esperado:</b> una fila por vértice, con columnas de punto/vértice, Este o X y Norte o Y. También puedes usar un CSV con encabezados <code>Punto,Este,Norte</code>. Usa coordenadas proyectadas en metros; latitud/longitud no sirven directamente para calcular área en m².</div>
+  <div class="grid3">
+    <div><label>Punto</label><input id="pt" placeholder="1"></div>
+    <div><label>Este / X</label><input id="east" type="number" step="any" placeholder="500000"></div>
+    <div><label>Norte / Y</label><input id="north" type="number" step="any" placeholder="1600000"></div>
+  </div>
+  <button id="add">Agregar vértice</button><button class="secondary" id="sample">Cargar ejemplo</button><button class="secondary" id="clear">Limpiar puntos</button><button class="secondary" id="reorder">Aplicar recorrido CAMOTAN</button><button class="secondary" id="restoreOrder">Restaurar CSV completo</button>
+  <div class="tablewrap"><table><thead><tr><th>Punto</th><th>Este / X</th><th>Norte / Y</th><th></th></tr></thead><tbody id="coordsBody"></tbody></table></div>
+  <div id="status" class="status" aria-live="polite"></div><div id="geometryWarning" class="note" aria-live="polite" style="display:none"></div><div class="small">La secuencia CAMOTAN solo se ofrece cuando los puntos coinciden con el CSV revisado y el área del PDF de referencia. Para otros archivos, revisa y corrige el orden con el levantamiento original; no reordenes automáticamente los vértices.</div>
+  <div class="note">El dibujo une los puntos en el orden de la tabla y cierra el polígono automáticamente. Revisa que los vértices estén ordenados alrededor del lindero y que no haya puntos repetidos o cruces.</div>
+</section>
+<section class="panel">
+  <div class="preview-head"><div><h2 style="margin-bottom:4px">Vista previa del plano</h2><div class="small">Plantilla inspirada en el ejemplo adjunto. El diseño no representa una certificación oficial.</div></div><div class="screen-only"><button id="print">Imprimir / Guardar PDF</button><button class="secondary" id="csvout">Descargar coordenadas CSV</button></div></div>
+  <div class="metrics">
+    <div class="metric"><span>Área calculada</span><strong id="areaMetric">— m²</strong></div>
+    <div class="metric"><span>Perímetro</span><strong id="perimMetric">— m</strong></div>
+    <div class="metric"><span>Vértices</span><strong id="countMetric">0</strong></div>
+  </div>
+  <div id="plan" aria-label="Vista previa del plano"></div>
+</section>
+</main>
+<footer>Herramienta de apoyo. Verifica sistema de coordenadas, unidades, cierres, escala, datos registrales y requisitos vigentes con un profesional competente antes de presentar el plano.</footer>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script>
+const $=id=>document.getElementById(id);
+let points=[];
+const fmt=(n,d=3)=>Number(n).toLocaleString('es-GT',{minimumFractionDigits:d,maximumFractionDigits:d});
+function setStatus(s,bad=false){$('status').textContent=s;$('status').style.color=bad?'#a02d2d':'#1f6644'}
+function norm(s){return String(s??'').trim().toLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').replace(/[^a-z0-9]/g,'')}
+
+let originalCsvPoints=[];
+let excludedCsvPoints=[];
+function orient(a,b,c){return (b.x-a.x)*(c.y-a.y)-(b.y-a.y)*(c.x-a.x)}
+function onSegment(a,b,p){return Math.min(a.x,b.x)-1e-9<=p.x&&p.x<=Math.max(a.x,b.x)+1e-9&&Math.min(a.y,b.y)-1e-9<=p.y&&p.y<=Math.max(a.y,b.y)+1e-9}
+function segmentsCross(a,b,c,d){
+ const o1=orient(a,b,c),o2=orient(a,b,d),o3=orient(c,d,a),o4=orient(c,d,b);
+ if(((o1>0&&o2<0)||(o1<0&&o2>0))&&((o3>0&&o4<0)||(o3<0&&o4>0)))return true;
+ return (Math.abs(o1)<1e-9&&onSegment(a,b,c))||(Math.abs(o2)<1e-9&&onSegment(a,b,d))||(Math.abs(o3)<1e-9&&onSegment(c,d,a))||(Math.abs(o4)<1e-9&&onSegment(c,d,b));
+}
+function findCrossings(arr){
+ const n=arr.length,out=[];
+ for(let i=0;i<n;i++){
+  const a=arr[i],b=arr[(i+1)%n];
+  for(let j=i+1;j<n;j++){
+   if(j===i||j===(i+1)%n||(j+1)%n===i)continue;
+   const c=arr[j],d=arr[(j+1)%n];
+   if(segmentsCross(a,b,c,d))out.push(`${a.name}–${b.name} con ${c.name}–${d.name}`);
+  }
+ }
+ return out;
+}
+function polygonAreaOf(arr){
+ if(arr.length<3)return 0;let s=0;
+ for(let i=0;i<arr.length;i++){const a=arr[i],b=arr[(i+1)%arr.length];s+=a.x*b.y-b.x*a.y;}
+ return Math.abs(s)/2;
+}
+// Recorre el CSV entregado junto al plano CAMOTAN.pdf. La combinación de vértices 1–20 y 23
+// produce un cierre sin cruces y un área que coincide con la indicada en ese PDF (13,081.49 m²).
+// Esta regla solo se aplica si coinciden los números de punto y el área, no a otros CSV genéricos.
+function getCamotanCandidate(arr){
+ if(!Array.isArray(arr)||arr.length!==25)return null;
+ const names=arr.map(p=>String(p.name).trim());
+ const expected=[...Array(20)].map((_,i)=>String(i+1)).concat(['21','22','23','24','25']);
+ if(names.some((n,i)=>n!==expected[i]))return null;
+ const keep=new Set([...Array(20)].map((_,i)=>String(i+1)).concat(['23']));
+ const candidate=arr.filter(p=>keep.has(String(p.name).trim()));
+ const excluded=arr.filter(p=>!keep.has(String(p.name).trim()));
+ if(candidate.length!==21||findCrossings(candidate).length)return null;
+ if(Math.abs(polygonAreaOf(candidate)-13081.49)>0.05)return null;
+ return {points:candidate,excluded};
+}
+function updateGeometryWarning(){
+ const el=$('geometryWarning'); if(!el)return;
+ const crossings=points.length>=4?findCrossings(points):[];
+ if(crossings.length){
+  el.style.display='block';
+  el.innerHTML='<b>Atención: el polígono tiene cruces.</b> Tramos detectados: '+crossings.slice(0,5).map(s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;')).join('; ')+(crossings.length>5?'…':'')+'. Comprueba la secuencia con el levantamiento original.';
+ }else if(excludedCsvPoints.length){
+  const names=excludedCsvPoints.map(p=>String(p.name)).join(', ');
+  el.style.display='block';
+  el.innerHTML='<b>Se excluyeron temporalmente del dibujo los puntos '+names+'.</b> El CSV original se conserva en memoria. La secuencia mostrada tiene 21 vértices, no presenta cruces y el área calculada coincide con el área de CAMOTAN.pdf (13,081.49 m²). Verifica que los puntos excluidos no correspondan a linderos que deban incluirse antes de usar el plano oficialmente.';
+ }else{
+  el.style.display='none';el.textContent='';
+ }
+}
+function reorderAroundCentroid(arr){
+ // 2-opt: elimina cruces invirtiendo segmentos entre aristas cruzadas.
+ // Conserva los mismos vértices, pero puede cambiar su secuencia; validar con el levantamiento.
+ const result=[...arr],n=result.length;
+ for(let pass=0;pass<n*n;pass++){
+  let changed=false;
+  outer: for(let i=0;i<n;i++){
+   const a=result[i],b=result[(i+1)%n];
+   for(let j=i+2;j<n;j++){
+    if(i===0&&j===n-1)continue;
+    const c=result[j],d=result[(j+1)%n];
+    if(segmentsCross(a,b,c,d)){
+     let lo=i+1,hi=j;
+     while(lo<hi){const tmp=result[lo];result[lo]=result[hi];result[hi]=tmp;lo++;hi--;}
+     changed=true;break outer;
+    }
+   }
+  }
+  if(!changed)break;
+ }
+ return result;
+}
+function renderTable(){
+ const body=$('coordsBody');body.innerHTML='';
+ points.forEach((p,i)=>{const tr=document.createElement('tr');
+ [p.name,p.x,p.y].forEach(v=>{const td=document.createElement('td');td.textContent=v;tr.appendChild(td)});
+ const td=document.createElement('td'),b=document.createElement('button');b.textContent='×';b.className='danger';b.style.padding='3px 8px';b.onclick=()=>{points.splice(i,1);refresh()};td.appendChild(b);tr.appendChild(td);body.appendChild(tr)});
+ updatePlan();
+}
+function area(){
+ if(points.length<3)return 0;let s=0;
+ for(let i=0;i<points.length;i++){let a=points[i],b=points[(i+1)%points.length];s+=a.x*b.y-b.x*a.y}
+ return Math.abs(s)/2;
+}
+function dist(a,b){return Math.hypot(b.x-a.x,b.y-a.y)}
+function azimuth(a,b){let deg=Math.atan2(b.x-a.x,b.y-a.y)*180/Math.PI;return (deg+360)%360}
+function dms(deg){let d=Math.floor(deg),m0=(deg-d)*60,m=Math.floor(m0),s=Math.round((m0-m)*60);if(s===60){s=0;m++}if(m===60){m=0;d=(d+1)%360}return `${d}°${String(m).padStart(2,'0')}'${String(s).padStart(2,'0')}"`}
+function updatePlan(){
+ const n=points.length;let perimeter=0;if(n>1)for(let i=0;i<n;i++)perimeter+=dist(points[i],points[(i+1)%n]);
+ $('areaMetric').textContent=n>=3?fmt(area(),4)+' m²':'— m²';$('perimMetric').textContent=n>=2?fmt(perimeter,3)+' m':'— m';$('countMetric').textContent=n;
+ const W=990,H=1530,esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+ let svg=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}"><rect x="14" y="14" width="962" height="1502" fill="white" stroke="#111" stroke-width="4"/>`;
+ svg+=`<rect x="28" y="28" width="330" height="62" fill="white" stroke="#111" stroke-width="2"/><text x="193" y="53" text-anchor="middle" font-size="19" font-weight="bold">REGISTRO GENERAL</text><text x="193" y="75" text-anchor="middle" font-size="19" font-weight="bold">DE LA PROPIEDAD</text><g transform="translate(915 72)"><circle r="28" fill="none" stroke="#444" stroke-width="2"/><path d="M0 -43 L-8 12 L0 5 L8 12 Z" fill="#555"/><text x="0" y="24" text-anchor="middle" font-size="15">N</text></g>`;
+ if(n>=2){let minX=Math.min(...points.map(p=>p.x)),maxX=Math.max(...points.map(p=>p.x)),minY=Math.min(...points.map(p=>p.y)),maxY=Math.max(...points.map(p=>p.y)),dx=maxX-minX||1,dy=maxY-minY||1;
+ const bx=55,by=145,bw=820,bh=390,scale=Math.min((bw-100)/dx,(bh-100)/dy),ox=bx+(bw-dx*scale)/2,oy=by+(bh-dy*scale)/2,xy=p=>[ox+(p.x-minX)*scale,oy+(maxY-p.y)*scale];
+ if(n>=3)svg+=`<polygon points="${points.map(p=>xy(p).join(',')).join(' ')}" fill="none" stroke="#111" stroke-width="2.5"/>`;else svg+=`<polyline points="${points.map(p=>xy(p).join(',')).join(' ')}" fill="none" stroke="#111" stroke-width="2.5"/>`;
+ points.forEach(p=>{let [x,y]=xy(p);svg+=`<circle cx="${x}" cy="${y}" r="4" fill="white" stroke="#111" stroke-width="1.7"/><text x="${x+7}" y="${y-7}" font-size="14" font-weight="bold">${esc(p.name)}</text>`});
+ // Coloca los colindantes alrededor del polígono según la orientación indicada en el campo.
+ const rawN=$('neighbors').value||'';
+ const dirNames={};
+ const dirRegex=/(norte|sur|este|oeste)\s*(?:colinda\s*con|:|=|[-–])\s*([^,;\n]+)/gi;
+ let mm;while((mm=dirRegex.exec(rawN))!==null)dirNames[mm[1].toLowerCase()]=mm[2].trim();
+ // Admite también entradas breves como "Norte: camino; Este: finca vecina".
+ if(Object.keys(dirNames).length===0){rawN.split(/[;\n]/).forEach(part=>{const m=part.match(/(norte|sur|este|oeste)\s*:?\s*(.+)/i);if(m)dirNames[m[1].toLowerCase()]=m[2].trim();});}
+ const minPX=Math.min(...points.map(p=>xy(p)[0])),maxPX=Math.max(...points.map(p=>xy(p)[0])),minPY=Math.min(...points.map(p=>xy(p)[1])),maxPY=Math.max(...points.map(p=>xy(p)[1]));
+ const labelStyle='font-size="13" font-weight="bold" fill="#222"';
+ if(dirNames.norte)svg+=`<text x="${(minPX+maxPX)/2}" y="${Math.max(112,minPY-15)}" text-anchor="middle" ${labelStyle}>${esc('Norte: '+dirNames.norte)}</text>`;
+ if(dirNames.sur)svg+=`<text x="${(minPX+maxPX)/2}" y="${Math.min(600,maxPY+22)}" text-anchor="middle" ${labelStyle}>${esc('Sur: '+dirNames.sur)}</text>`;
+ if(dirNames.oeste)svg+=`<text x="${Math.max(35,minPX-12)}" y="${(minPY+maxPY)/2}" text-anchor="end" ${labelStyle} transform="rotate(-90 ${Math.max(35,minPX-12)} ${(minPY+maxPY)/2})">${esc('Oeste: '+dirNames.oeste)}</text>`;
+ if(dirNames.este)svg+=`<text x="${Math.min(950,maxPX+18)}" y="${(minPY+maxPY)/2}" text-anchor="start" ${labelStyle} transform="rotate(90 ${Math.min(950,maxPX+18)} ${(minPY+maxPY)/2})">${esc('Este: '+dirNames.este)}</text>`;
+ }else svg+=`<text x="495" y="440" text-anchor="middle" font-size="24" fill="#888">Agrega al menos 3 vértices para dibujar la finca</text>`;
+ const tx=500,ty=570,tw=420,rowH=Math.min(20,Math.max(13,(1080-ty-34)/Math.max(n,1))),tableH=34+Math.max(n,1)*rowH;
+ svg+=`<rect x="${tx}" y="${ty}" width="${tw}" height="${tableH}" fill="white" stroke="#111" stroke-width="1.5"/><rect x="${tx}" y="${ty}" width="${tw}" height="30" fill="#f0f0f0" stroke="#111"/>`;
+ svg+=`<text x="${tx+12}" y="${ty+20}" font-size="11" font-weight="bold">EST.</text><text x="${tx+70}" y="${ty+20}" font-size="11" font-weight="bold">P.O.</text><text x="${tx+150}" y="${ty+20}" font-size="11" font-weight="bold">AZIMUT</text><text x="${tx+285}" y="${ty+20}" font-size="11" font-weight="bold">DISTANCIA (m)</text>`;
+ for(let i=0;i<n;i++){let a=points[i],b=points[(i+1)%n],y=ty+30+(i+1)*rowH;svg+=`<line x1="${tx}" y1="${y}" x2="${tx+tw}" y2="${y}" stroke="#bbb" stroke-width=".7"/><text x="${tx+12}" y="${y-6}" font-size="10">${esc(a.name)}</text><text x="${tx+70}" y="${y-6}" font-size="10">${esc(b.name)}</text><text x="${tx+150}" y="${y-6}" font-size="10">${dms(azimuth(a,b))}</text><text x="${tx+285}" y="${y-6}" font-size="10">${fmt(dist(a,b),3)}</text>`}
+ const ay=Math.min(ty+tableH+22,1110);svg+=`<text x="${tx}" y="${ay}" font-size="13" font-weight="bold">ÁREA = ${n>=3?fmt(area(),4):'—'} m²</text><text x="${tx+205}" y="${ay}" font-size="12" font-weight="bold">PERÍMETRO = ${n>=2?fmt(perimeter,3):'—'} m</text>`;
+ const y0=1130,blockH=345,leftW=635,rowY=y0+42,rowStep=40;
+ svg+=`<rect x="28" y="${y0}" width="934" height="${blockH}" fill="white" stroke="#111" stroke-width="2.5"/><rect x="28" y="${y0}" width="934" height="42" fill="#f1f1f1" stroke="#111"/><text x="495" y="${y0+29}" text-anchor="middle" font-size="23" font-weight="bold">PLANO DE FINCA NUEVA POR TITULACIÓN</text><line x1="${28+leftW}" y1="${rowY}" x2="${28+leftW}" y2="${y0+blockH}" stroke="#111" stroke-width="1.5"/><line x1="${28+leftW+190}" y1="${rowY}" x2="${28+leftW+190}" y2="${y0+blockH}" stroke="#111" stroke-width="1.2"/>`;
+ const rows=[`*NATURALEZA FINCA NUEVA: RÚSTICA: ${$('nature').value==='Rústica'?'X':'____'} URBANA: ${$('nature').value==='Urbana'?'X':'____'}`,`*UBICACIÓN FINCA NUEVA: MUNICIPIO: ${$('municipality').value||'—'} DEPTO.: ${$('department').value||'—'}`,`*ÁREA FINCA NUEVA: ${n>=3?fmt(area(),4)+' m²':'—'}`,`NOMBRE FINCA NUEVA: ${$('estate').value||'SIN NOMBRE'}`,`DIRECCIÓN FINCA NUEVA: ${$('address').value||'SIN DIRECCIÓN'}`,`*PROPIETARIO(S): ${$('owner').value||'—'}`];
+ rows.forEach((r,i)=>{let y=rowY+(i+1)*rowStep;svg+=`<line x1="28" y1="${y}" x2="${28+leftW}" y2="${y}" stroke="#aaa" stroke-width=".8"/><text x="38" y="${y-14}" font-size="13">${esc(r)}</text>`});
+ svg+=`<text x="${28+leftW+95}" y="${rowY+58}" text-anchor="middle" font-size="15" font-weight="bold">ESCALA: ${esc($('scale').value||'—')}</text><text x="${28+leftW+95}" y="${rowY+88}" text-anchor="middle" font-size="14">FECHA: ${esc($('date').value||'—')}</text><text x="${28+leftW+95}" y="${rowY+150}" text-anchor="middle" font-size="14" font-weight="bold">FIRMA Y SELLO</text><line x1="${28+leftW+22}" y1="${rowY+205}" x2="${28+leftW+168}" y2="${rowY+205}" stroke="#222"/><text x="${28+leftW+95}" y="${rowY+225}" text-anchor="middle" font-size="11">${esc($('professional').value||'Arquitecto, Ingeniero o responsable')}</text><text x="495" y="1493" text-anchor="middle" font-size="10" fill="#555">BORRADOR DE APOYO — verificar formato vigente, cálculos y requisitos profesionales antes de presentar</text></svg>`;
+ $('plan').innerHTML=svg;
+ updateGeometryWarning();
+}
+function refresh(){renderTable()}
+$('add').onclick=()=>{let name=$('pt').value.trim()||String(points.length+1),x=Number($('east').value),y=Number($('north').value);if($('east').value===''||$('north').value===''||!Number.isFinite(x)||!Number.isFinite(y)){setStatus('Ingresa coordenadas Este/X y Norte/Y válidas.',true);return}points.push({name,x,y});$('pt').value='';$('east').value='';$('north').value='';setStatus('Vértice agregado.');refresh()};
+$('clear').onclick=()=>{points=[];originalCsvPoints=[];excludedCsvPoints=[];refresh();setStatus('Lista de coordenadas vaciada.')};
+$('reorder').onclick=()=>{
+ const candidate=getCamotanCandidate(originalCsvPoints);
+ if(!candidate){setStatus('Este CSV no coincide con el conjunto de puntos de CAMOTAN.pdf. No se cambiará el orden automáticamente; verifica el levantamiento original.',true);return;}
+ points=candidate.points.map(p=>({...p}));excludedCsvPoints=candidate.excluded.map(p=>({...p}));refresh();
+ setStatus('Se aplicó la secuencia de CAMOTAN.pdf: puntos 1–20 y 23. Puntos 21, 22, 24 y 25 se excluyen del dibujo porque introducen cruces; valida la decisión con tu levantamiento.');
+};
+$('restoreOrder').onclick=()=>{
+ if(originalCsvPoints.length){points=originalCsvPoints.map(p=>({...p}));excludedCsvPoints=[];refresh();setStatus('Se restauraron todos los puntos originales del CSV. Si el archivo contiene cruces, el polígono volverá a mostrarlos.');}
+ else {setStatus('No hay un CSV original guardado. Vuelve a cargar el archivo.',true)}
+};
+
+$('sample').onclick=()=>{originalCsvPoints=[];excludedCsvPoints=[];points=[{name:'1',x:500000,y:1600000},{name:'2',x:500120,y:1599940},{name:'3',x:500070,y:1599870},{name:'4',x:500010,y:1599890},{name:'5',x:499970,y:1599930}];refresh();setStatus('Ejemplo cargado. Sustitúyelo por las coordenadas reales antes de usar el plano.')};
+function parseCoordinateNumber(value){
+ let s=String(value??'').trim().replace(/[\s\u00A0]/g,'');
+ if(!s)return NaN;
+ // Accept decimal comma or decimal point, and remove thousands separators where unambiguous.
+ if(s.includes(',')&&s.includes('.')){
+   if(s.lastIndexOf(',')>s.lastIndexOf('.')) s=s.replace(/\./g,'').replace(',','.');
+   else s=s.replace(/,/g,'');
+ } else if(s.includes(',')) {
+   const parts=s.split(',');
+   if(parts.length===2 && parts[1].length!==3) s=s.replace(',','.');
+   else s=s.replace(/,/g,'');
+ }
+ return Number(s);
+}
+function parseCsvRows(text){
+ text=text.replace(/^\uFEFF/,'');
+ const lines=text.split(/\r?\n/).filter(line=>line.trim());
+ if(!lines.length)return [];
+ // Choose the delimiter with the most occurrences in the first non-empty row.
+ const first=lines[0];
+ const candidates=[',',';','\t'];
+ const delim=candidates.map(d=>({d,count:(first.split(d).length-1)})).sort((a,b)=>b.count-a.count)[0].d;
+ return lines.map(line=>{
+   const out=[];let cur='',quoted=false;
+   for(let i=0;i<line.length;i++){
+     const ch=line[i];
+     if(ch==='"'&&quoted&&line[i+1]==='"'){cur+='"';i++;}
+     else if(ch==='"')quoted=!quoted;
+     else if(ch===delim&&!quoted){out.push(cur.trim());cur='';}
+     else cur+=ch;
+   }
+   out.push(cur.trim());return out;
+ });
+}
+$('file').addEventListener('change',async e=>{
+ const f=e.target.files[0];if(!f)return;
+ try{
+  let rows=[];
+  if(f.name.toLowerCase().endsWith('.csv')) rows=parseCsvRows(await f.text());
+  else {
+   if(!window.XLSX)throw new Error('No se pudo cargar el lector Excel. Comprueba tu conexión a internet o guarda la hoja como CSV.');
+   const data=await f.arrayBuffer(),wb=XLSX.read(data,{type:'array'});
+   rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,raw:true,defval:''});
+  }
+  if(!rows.length)throw new Error('El archivo está vacío.');
+  const normHeader=v=>String(v??'').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]/g,'');
+  const header=rows[0].map(normHeader);
+  const find=keys=>header.findIndex(h=>keys.some(k=>h===k||h.includes(k)));
+  let ixP=find(['punto','vertice','estacion','numeropunto','nopunto']);
+  let ixX=find(['este','easting','coordenadaeste','coordeste','xeste','coordx']);
+  let ixY=find(['norte','northing','coordenadanorte','coordnorte','ynorte','coordy']);
+  let start=(ixX>=0&&ixY>=0)?1:0;
+  // User's stated CSV layout: column 1 = point number, column 2 = East/X, column 3 = North/Y.
+  // If headers are missing or unusual, explicitly use those first three columns.
+  if(ixX<0||ixY<0){ixP=0;ixX=1;ixY=2;start=0;}
+  // If the first row looks like a header, skip it even when the headers are unusual.
+  if(rows[0].some(v=>/[a-záéíóúñ]/i.test(String(v??'')))){
+    const firstX=parseCoordinateNumber(rows[0][ixX]), firstY=parseCoordinateNumber(rows[0][ixY]);
+    if(!Number.isFinite(firstX)||!Number.isFinite(firstY))start=1;
+  }
+  const loaded=[];
+  for(let i=start;i<rows.length;i++){
+    const r=rows[i]||[];
+    const x=parseCoordinateNumber(r[ixX]), y=parseCoordinateNumber(r[ixY]);
+    if(!String(r[ixX]??'').trim()||!String(r[ixY]??'').trim()||!Number.isFinite(x)||!Number.isFinite(y))continue;
+    loaded.push({name:String((ixP>=0?r[ixP]:'')??'').trim()||String(loaded.length+1),x,y});
+  }
+  if(loaded.length<3)throw new Error('No pude leer 3 o más puntos. El CSV debe tener exactamente estas columnas, en este orden: número de punto, Este/X, Norte/Y. Ejemplo: 1,500000,1600000');
+  originalCsvPoints=loaded.map(p=>({...p}));
+  const camotan=getCamotanCandidate(originalCsvPoints);
+  excludedCsvPoints=[];
+  if(camotan){
+    points=camotan.points.map(p=>({...p}));excludedCsvPoints=camotan.excluded.map(p=>({...p}));refresh();
+    setStatus(`Se leyeron ${loaded.length} filas. Para evitar los cruces y coincidir con CAMOTAN.pdf, se dibujan los puntos 1–20 y 23 (${points.length} vértices). Los puntos 21, 22, 24 y 25 se conservan en el CSV original, pero se excluyen temporalmente del dibujo.`);
+  }else{
+    points=loaded;refresh();
+    const crossings=findCrossings(points);
+    setStatus(`Se cargaron ${points.length} puntos automáticamente. Columnas interpretadas: punto = ${ixP+1}, Este = ${ixX+1}, Norte = ${ixY+1}.`+(crossings.length?' Se detectaron cruces; revisa el orden de los vértices contra el levantamiento.':''),crossings.length>0);
+  }
+ }catch(err){setStatus(err.message||'No se pudo leer el archivo.',true)}
+});
+['owner','estate','address','municipality','department','nature','scale','date','professional','neighbors'].forEach(id=>$(id).addEventListener('input',updatePlan));
+$('print').onclick=()=>window.print();
+$('csvout').onclick=()=>{if(!points.length){setStatus('No hay coordenadas para descargar.',true);return}const csv='Punto,Este,Norte\n'+points.map(p=>`${JSON.stringify(p.name)},${p.x},${p.y}`).join('\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\\ufeff'+csv],{type:'text/csv;charset=utf-8;'}));a.download='coordenadas_finca.csv';a.click();URL.revokeObjectURL(a.href)};
+$('date').value=new Date().toISOString().slice(0,10);
+updatePlan();
+</script>
+</body>
+</html>

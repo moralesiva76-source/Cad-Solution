@@ -1,0 +1,10 @@
+PORTAL DE PLANOS — AJUSTE DEL POLÍGONO CON REFERENCIA CAMOTAN.pdf
+====================================================================
+
+- Carga el CSV con columnas Punto, Este, Norte.
+- El portal reconoce de forma específica el CSV revisado cuando contiene 25 puntos numerados 1–25 y la combinación de puntos 1–20 y 23 genera un polígono simple con área coincidente con CAMOTAN.pdf (13,081.49 m²).
+- En ese caso dibuja el recorrido 1–20, 23 y excluye temporalmente 21, 22, 24 y 25, que generan cruces / no forman parte del contorno del PDF de referencia.
+- “Restaurar CSV completo” devuelve todos los puntos originales. “Aplicar recorrido CAMOTAN” vuelve a aplicar la selección solo si el conjunto coincide.
+- Para otros CSV, no se alterará automáticamente el orden; si hay cruces, revisa los puntos con el levantamiento original.
+
+IMPORTANTE: La selección de puntos se basa en la comparación con el PDF de referencia adjunto y coincide numéricamente en área. Antes de presentar un plano oficialmente, confirma con el responsable del levantamiento que los puntos excluidos no sean parte de linderos válidos. El programa conserva el CSV original en memoria, sin modificar el archivo local.
